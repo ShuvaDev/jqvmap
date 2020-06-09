@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JQVMAP</title>
+    <link href="./jqvmap/dist/jqvmap.css" media="screen" rel="stylesheet" type="text/css">
+    <style>.d-none{display: none;}</style>
+</head>
+<body>
+    <div id="vmap" style="height: 420px"></div>
+
+     <!-- HoverMap Info -->
+    <div id="hoverMapInfo" class="m-0 p-5 d-none">
+        <img src="https://disease.sh/assets/img/flags/bd.png" width="30" id="flag">
+        <span id="cName">Bangladesh</span>
+        <p class="p-0 m-0">Cases: <span id="cases">200</span></p>
+        <p class="p-0 m-0">Death: <span id="death">200</span></p>
+        <p class="p-0 m-0">Active: <span id="active">200</span></p>
+        <p class="p-0 m-0">Recovered: <span id="recovered">500</span></p>
+    </div>
+
+    <script src="./jqvmap/dist/jquery.min.js"></script>
+    <script src="./jqvmap/dist/jquery.vmap.js"></script>
+    <script src="./jqvmap/dist/maps/jquery.vmap.world.js"></script>
+    <script src="./jqvmap/dist/lgdData.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+        let hoverMapInfo = document.getElementById('hoverMapInfo')
+        console.log(hoverMapInfo)
+        let death = document.getElementById('death')
+        let flag = document.getElementById('flag')
+        let cases = document.getElementById('cases')
+        let active = document.getElementById('active')
+        let recovered = document.getElementById('recovered')
+        let cName = document.getElementById('cName')
+        function mapData(data) {
+            hoverMapInfo.className = 'p-1'
+            cases.innerText = data.cases
+            death.innerText = data.deaths
+            active.innerText = data.active
+            recovered.innerText = data.recovered
+            flag.src = data.countryInfo.flag
+            cName.innerText = data.country
+        }
+        jQuery('#vmap').vectorMap({
+            map: 'world_en',
+            backgroundColor: '#fff',
+            color: '#000',
+            hoverOpacity: 0.7,
+            selectedColor: '#7B6FFF',
+            enableZoom: true,
+            showTooltip: true,
+            values: lgdData,
+            scaleColors: ['#D60000', '#780000'],
+            normalizeFunction: 'polynomial',
+            onLabelShow: function(_, label, code) {
+                axios.get(`https://disease.sh/v2/countries/${code}`)
+                .then(res => {
+                    label[0].innerText = '';
+                    label[0].innerHTML = '';
+                    mapData(res.data)
+                    label.append(hoverMapInfo)
+                })
+            }
+        });
+    </script>
+</body>
+</html>
